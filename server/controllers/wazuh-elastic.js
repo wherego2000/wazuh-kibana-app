@@ -257,10 +257,10 @@ export class WazuhElasticCtrl {
       const xpack = await this.wzWrapper.getPlugins();
 
       const isXpackEnabled =
-        typeof XPACK_RBAC_ENABLED !== 'undefined' &&
+        (typeof XPACK_RBAC_ENABLED !== 'undefined' &&
         XPACK_RBAC_ENABLED &&
         typeof xpack === 'string' &&
-        xpack.includes('x-pack');
+        xpack.includes('x-pack')) || xpack.includes('search-guard');
 
       const isSuperUser =
         isXpackEnabled &&
