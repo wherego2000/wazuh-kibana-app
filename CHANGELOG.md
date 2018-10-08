@@ -2,6 +2,49 @@
 
 All notable changes to the Wazuh app project will be documented in this file.
 
+## Wazuh v3.7.0 - Kibana v6.4.2 - Revision 413
+
+### Added
+
+-   Support for Wazuh v3.7.0.
+-   Support for Elastic Stack v6.4.2.
+-   Brand-new interface for _Configuration_ (on both _Management_ and _Agents_ tabs) ([#914](https://github.com/wazuh/wazuh-kibana-app/pull/914)):
+    -   Now you can check current and real agent and manager configuration.
+    -   A new interface design, with more useful information and easy to understand descriptions.
+    -   New and more responsive JSON/XML viewers to show the configuration in raw mode.
+-   Brand-new extension - Osquery ([#938](https://github.com/wazuh/wazuh-kibana-app/pull/938)):
+    -   A new extension, disabled by default.
+    -   Check alerts from Wazuh's Osquery integration.
+    -   Check your current Osquery wodle configuration.
+    -   More improvements will come for this extension in the future.
+-   Added quick access to _Configuration_ or _Discover_ panels for an agent on the agents list ([#939](https://github.com/wazuh/wazuh-kibana-app/pull/939)).
+-   Redesigned the _Overview > Amazon AWS_ tab, using more meaningful visualizations for a better overall view of your agents' status ([#903](https://github.com/wazuh/wazuh-kibana-app/pull/903)).
+-   Now you can click on an agent's ID on the _Discover_ panels to open its details page on the app ([#904](https://github.com/wazuh/wazuh-kibana-app/pull/904)).
+
+### Changed
+
+-   Interface refactoring for the _Agents > Inventory data_ tab ([#924](https://github.com/wazuh/wazuh-kibana-app/pull/924)):
+    -   Now the tab won't be available if your agent doesn't have Syscollector enabled, and each card will be enabled or disabled depending on the current Syscollector scans configuration.
+    -   This will prevent situations where the user couldn't check the inventory although there was actual scan data to show on some sections.
+-   Added support for new multigroups feature ([#911](https://github.com/wazuh/wazuh-kibana-app/pull/911)):
+    -   Now the information bars on _Agents_ will show all the groups an agent belongs to.
+-   Now the result pane on the _Dev tools_ tab will show the error code coming from the Wazuh API ([#909](https://github.com/wazuh/wazuh-kibana-app/pull/909)).
+-   Changed some visualizations titles for _Overview/Agents > OpenSCAP_ tab ([#925](https://github.com/wazuh/wazuh-kibana-app/pull/925)).
+-   All backend routes have been renamed ([#932](https://github.com/wazuh/wazuh-kibana-app/pull/932)).
+-   Several improvements for Elasticsearch tests ([#933](https://github.com/wazuh/wazuh-kibana-app/pull/933)).
+-   Updated some strings and descriptions on the _Settings_ tab ([#934](https://github.com/wazuh/wazuh-kibana-app/pull/934)).
+
+### Fixed
+
+-   Several known fields for _Whodata_ functionality have been fixed ([#901](https://github.com/wazuh/wazuh-kibana-app/pull/901)).
+-   Fixed alignment bug with the _Add a filter +_ button on _Discover_ and _Agents_ tabs ([#912](https://github.com/wazuh/wazuh-kibana-app/pull/912)).
+
+## Wazuh v3.6.1 - Kibana v6.4.1/v6.4.2 - Revision 412
+
+### Added
+
+-   Support for Elastic Stack v6.4.1/v6.4.2.
+
 ## Wazuh v3.6.1 - Kibana v6.4.0 - Revision 411
 
 ### Added

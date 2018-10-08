@@ -66,6 +66,7 @@ class AgentsController {
     this.$scope.configurationSubTab = '';
     this.$scope.integrations = {};
     this.$scope.selectedItem = 0;
+    this.targetLocation = null;
   }
 
   $onInit() {
@@ -81,8 +82,16 @@ class AgentsController {
     const extensions = this.appState.getExtensions(currentApi);
     this.$scope.extensions = extensions;
 
-    this.$scope.tabView = this.commonData.checkTabViewLocation();
-    this.$scope.tab = this.commonData.checkTabLocation();
+    // Getting possible target location
+    this.targetLocation = this.shareAgent.getTargetLocation();
+
+    if (this.targetLocation && typeof this.targetLocation === 'object') {
+      this.$scope.tabView = this.targetLocation.subTab;
+      this.$scope.tab = this.targetLocation.tab;
+    } else {
+      this.$scope.tabView = this.commonData.checkTabViewLocation();
+      this.$scope.tab = this.commonData.checkTabLocation();
+    }
 
     this.tabHistory = [];
     if (
@@ -99,7 +108,7 @@ class AgentsController {
 
     this.$scope.hostMonitoringTabs = ['general', 'fim', 'syscollector'];
     this.$scope.systemAuditTabs = ['pm', 'audit', 'oscap', 'ciscat'];
-    this.$scope.securityTabs = ['vuls', 'virustotal'];
+    this.$scope.securityTabs = ['vuls', 'virustotal', 'osquery'];
     this.$scope.complianceTabs = ['pci', 'gdpr'];
 
     this.$scope.inArray = (item, array) =>
@@ -247,14 +256,17 @@ class AgentsController {
       this.$scope.tabView = subtab;
 
       if (
-        subtab === 'panels' &&
-        this.$scope.tab !== 'configuration' &&
-        this.$scope.tab !== 'welcome' &&
-        this.$scope.tab !== 'syscollector'
+        ((subtab === 'panels') ||
+        (this.targetLocation &&
+        typeof this.targetLocation === 'object' &&
+        this.targetLocation.subTab === 'discover' &&
+        subtab === 'discover')) &&
+        !['configuration', 'welcome', 'syscollector'].includes(this.$scope.tab)
       ) {
+
         const condition =
-          (!this.changeAgent && localChange) ||
-          (!this.changeAgent && preserveDiscover);
+          !this.changeAgent && (localChange || preserveDiscover);
+
         await this.visFactoryService.buildAgentsVisualizations(
           this.filterHandler,
           this.$scope.tab,
@@ -262,6 +274,7 @@ class AgentsController {
           condition,
           this.$scope.agent.id
         );
+
         this.changeAgent = false;
       } else {
         this.$rootScope.$emit('changeTabView', {
@@ -299,17 +312,23 @@ class AgentsController {
       !force;
     this.$scope.tab = tab;
 
-    if (this.$scope.tab === 'configuration') {
-      this.firstLoad();
-    } else {
+    const targetSubTab =
+      this.targetLocation && typeof this.targetLocation === 'object'
+        ? this.targetLocation.subTab
+        : 'panels';
+
+    if (this.$scope.tab !== 'configuration') {
       this.$scope.switchSubtab(
-        'panels',
+        targetSubTab,
         true,
         onlyAgent,
         sameTab,
         preserveDiscover
       );
     }
+
+    this.shareAgent.deleteTargetLocation();
+    this.targetLocation = null;
   }
 
   // Agent data
@@ -430,6 +449,7 @@ class AgentsController {
 
   async getAgent(newAgentId) {
     try {
+      this.$scope.isSynchronized = false;
       this.$scope.load = true;
       this.changeAgent = true;
 
@@ -440,7 +460,8 @@ class AgentsController {
       const data = await Promise.all([
         this.apiReq.request('GET', `/agents/${id}`, {}),
         this.apiReq.request('GET', `/syscheck/${id}/last_scan`, {}),
-        this.apiReq.request('GET', `/rootcheck/${id}/last_scan`, {})
+        this.apiReq.request('GET', `/rootcheck/${id}/last_scan`, {}),
+        this.apiReq.request('GET', `/agents/${id}/group/is_sync`, {})
       ]);
 
       // Agent
@@ -459,6 +480,9 @@ class AgentsController {
       // Rootcheck
       this.$scope.agent.rootcheck = data[2].data.data;
       this.validateRootCheck();
+
+      // Configuration synced
+      this.$scope.isSynchronized = data[3] && data[3].data && data[3].data.data && data[3].data.data.synced;
 
       this.$scope.switchTab(this.$scope.tab, true);
 

@@ -61,14 +61,28 @@ app
         $scope.keyEquivalence = KeyEquivalenece;
         $scope.totalItems = 0;
 
-        $scope.clickAction = item => {
+        $scope.clickAction = (item, openAction = false) => {
           if (
             instance.path === '/agents' ||
             new RegExp(/^\/agents\/groups\/[a-zA-Z0-9]*$/).test(instance.path)
           ) {
+
             shareAgent.setAgent(item);
-            $location.search('tab', null);
+
+            // Check location target and go to that path
+            switch(openAction) {
+              case 'configuration':
+                shareAgent.setTargetLocation({'tab': 'configuration', 'subTab': 'panels'});
+                break;
+              case 'discover':
+                shareAgent.setTargetLocation({'tab': 'general', 'subTab': 'discover'});
+                break;
+              default:
+                shareAgent.setTargetLocation({'tab': 'welcome', 'subTab': 'panels'});
+            }
+
             $location.path('/agents');
+
           } else if (instance.path === '/agents/groups') {
             $scope.$emit('wazuhShowGroup', { group: item });
           } else if (
@@ -419,6 +433,10 @@ app
         });
 
         $scope.nonDecoderValue = (key, item) => {
+          if ((key === 'description' || key.value && key.value === 'description') && !item.description) {
+            return '---';
+          }
+
           if (key === 'state' && instance.path.includes('processes')) {
             return ProcessEquivalence[item.state] || 'Unknown';
           }
